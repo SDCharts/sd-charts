@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expenditures vs. GDP — SD Governance</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav><a href="../index.html">← All Charts</a></nav>
+
+<div class="chart-page">
+  <h1 id="chart-title"></h1>
+  <p id="chart-description" class="description"></p>
+
+  <div class="toggle-group">
+    <button class="toggle active" data-mode="index">Indexed Growth (Base = 100)</button>
+    <button class="toggle" data-mode="pct">Spending as % of GDP</button>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <div class="data-table-wrap">
+    <table id="dataTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="source-note" id="sourceNote"></div>
+</div>
+
+<script>
+let chart, allData, meta;
+
+async function init() {
+  const res = await fetch('../data/expenditures_vs_gdp.json');
+  const json = await res.json();
+  allData = json.data;
+  meta = json;
+
+  document.getElementById('chart-title').textContent = json.title;
+  document.getElementById('chart-description').textContent = json.description;
+  document.getElementById('sourceNote').innerHTML =
+    `<strong>Sources:</strong> ${json.sources.expenditures} / ${json.sources.gdp}`;
+
+  drawChart('index');
+  buildTable('index');
+
+  document.querySelectorAll('.toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.dataset.mode;
+      drawChart(mode);
+      buildTable(mode);
+    });
+  });
+}
+
+function drawChart(mode) {
+  const labels = allData.map(d => d.label);
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if (chart) chart.destroy();
+
+  let datasets;
+  if (mode === 'index') {
+    datasets = [
+      {
+        label: 'City Expenditures (indexed)',
+        data: allData.map(d => d.exp_index),
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: false,
+      },
+      {
+        label: 'San Diego MSA GDP (indexed)',
+        data: allData.map(d => d.gdp_index),
+        borderColor: '#2a9d8f',
+        backgroundColor: 'rgba(42,157,143,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: false,
+      },
+    ];
+  } else {
+    datasets = [
+      {
+        label: 'City Expenditures as % of MSA GDP',
+        data: allData.map(d => d.expenditures_pct_gdp),
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,0.12)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: true,
+      },
+    ];
+  }
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              return mode === 'pct'
+                ? `${ctx.dataset.label}: ${v.toFixed(2)}%`
+                : `${ctx.dataset.label}: ${v.toFixed(1)}`;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          ticks: {
+            font: { size: 12 },
+            callback: v => mode === 'pct' ? `${v}%` : v,
+          },
+        },
+        x: { ticks: { font: { size: 12 } } },
+      },
+    },
+  });
+}
+
+function buildTable(mode) {
+  const thead = document.querySelector('#dataTable thead');
+  const tbody = document.querySelector('#dataTable tbody');
+
+  if (mode === 'index') {
+    thead.innerHTML = '<tr><th>Year</th><th>Expenditures ($M)</th><th>Exp Index</th><th>GDP ($M)</th><th>GDP Index</th></tr>';
+    tbody.innerHTML = allData.map(d => `
+      <tr>
+        <td>${d.label}</td>
+        <td>$${d.expenditures_millions.toLocaleString()}M</td>
+        <td>${d.exp_index}</td>
+        <td>$${d.gdp_millions.toLocaleString()}M</td>
+        <td>${d.gdp_index}</td>
+      </tr>`).join('');
+  } else {
+    thead.innerHTML = '<tr><th>Year</th><th>Expenditures ($M)</th><th>GDP ($M)</th><th>Spending % of GDP</th></tr>';
+    tbody.innerHTML = allData.map(d => `
+      <tr>
+        <td>${d.label}</td>
+        <td>$${d.expenditures_millions.toLocaleString()}M</td>
+        <td>$${d.gdp_millions.toLocaleString()}M</td>
+        <td>${d.expenditures_pct_gdp}%</td>
+      </tr>`).join('');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
