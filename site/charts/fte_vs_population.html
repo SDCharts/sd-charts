@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personnel vs. Population Growth — SD Governance</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav><a href="../index.html">← All Charts</a></nav>
+
+<div class="chart-page">
+  <h1 id="chart-title"></h1>
+  <p id="chart-description" class="description"></p>
+
+  <div class="toggle-group">
+    <button class="toggle active" data-mode="index">Indexed Growth (Base = 100)</button>
+    <button class="toggle" data-mode="ratio">FTE per 1,000 Residents</button>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <div class="data-table-wrap">
+    <table id="dataTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="source-note" id="sourceNote"></div>
+</div>
+
+<script>
+let chart, allData, meta;
+
+async function init() {
+  const res = await fetch('../data/fte_vs_population.json');
+  const json = await res.json();
+  allData = json.data;
+  meta = json;
+
+  document.getElementById('chart-title').textContent = json.title;
+  document.getElementById('chart-description').textContent = json.description;
+  document.getElementById('sourceNote').innerHTML =
+    `<strong>Sources:</strong> ${json.sources.fte} / ${json.sources.population}`;
+
+  drawChart('index');
+  buildTable('index');
+
+  document.querySelectorAll('.toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.dataset.mode;
+      drawChart(mode);
+      buildTable(mode);
+    });
+  });
+}
+
+function drawChart(mode) {
+  const labels = allData.map(d => d.label);
+  const ctx = document.getElementById('mainChart').getContext('2d');
+
+  if (chart) chart.destroy();
+
+  let datasets;
+  if (mode === 'index') {
+    datasets = [
+      {
+        label: 'Total FTE Positions (indexed)',
+        data: allData.map(d => d.fte_index),
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: false,
+      },
+      {
+        label: 'MSA Population (indexed)',
+        data: allData.map(d => d.pop_index),
+        borderColor: '#457b9d',
+        backgroundColor: 'rgba(69,123,157,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: false,
+      },
+    ];
+  } else {
+    datasets = [
+      {
+        label: 'FTE per 1,000 Residents',
+        data: allData.map(d => d.fte_per_1000_residents),
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,0.12)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        tension: 0.3,
+        fill: true,
+      },
+    ];
+  }
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { mode: 'index', intersect: false },
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          ticks: { font: { size: 12 } },
+        },
+        x: { ticks: { font: { size: 12 } } },
+      },
+    },
+  });
+}
+
+function buildTable(mode) {
+  const thead = document.querySelector('#dataTable thead');
+  const tbody = document.querySelector('#dataTable tbody');
+
+  if (mode === 'index') {
+    thead.innerHTML = '<tr><th>Year</th><th>Total FTE</th><th>FTE Index</th><th>Population</th><th>Pop Index</th></tr>';
+    tbody.innerHTML = allData.map(d => `
+      <tr>
+        <td>${d.label}</td>
+        <td>${d.total_fte.toLocaleString()}</td>
+        <td>${d.fte_index}</td>
+        <td>${d.population.toLocaleString()}</td>
+        <td>${d.pop_index}</td>
+      </tr>`).join('');
+  } else {
+    thead.innerHTML = '<tr><th>Year</th><th>Total FTE</th><th>Population</th><th>FTE / 1,000 Residents</th></tr>';
+    tbody.innerHTML = allData.map(d => `
+      <tr>
+        <td>${d.label}</td>
+        <td>${d.total_fte.toLocaleString()}</td>
+        <td>${d.population.toLocaleString()}</td>
+        <td>${d.fte_per_1000_residents}</td>
+      </tr>`).join('');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
