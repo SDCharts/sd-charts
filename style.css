@@ -1,0 +1,186 @@
+/* SD Governance Charts — shared styles */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --border: #dee2e6;
+  --text: #212529;
+  --muted: #6c757d;
+  --accent: #e63946;
+  --accent2: #457b9d;
+  --radius: 8px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── Nav ── */
+nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+}
+nav a {
+  color: var(--accent2);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+nav a:hover { text-decoration: underline; }
+
+/* ── Gallery (index page) ── */
+.site-header {
+  background: #1d3557;
+  color: #fff;
+  padding: 40px 24px 32px;
+}
+.site-header h1 { font-size: 1.8rem; font-weight: 700; }
+.site-header p { opacity: 0.85; margin-top: 6px; font-size: 1rem; }
+
+.gallery-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 20px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.gallery-controls input[type="search"] {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  width: 260px;
+}
+.gallery-controls select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  background: var(--surface);
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 24px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.15s, transform 0.15s;
+  text-decoration: none;
+  color: var(--text);
+}
+.chart-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+.chart-card .category-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent2);
+}
+.chart-card h2 { font-size: 1.05rem; font-weight: 600; }
+.chart-card p { font-size: 0.875rem; color: var(--muted); flex: 1; }
+.chart-card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chart-card .tag {
+  font-size: 0.72rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: var(--muted);
+}
+.no-results {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+/* ── Chart page ── */
+.chart-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+.chart-page h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
+.chart-page .description {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  max-width: 680px;
+}
+.toggle-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.toggle {
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.toggle.active {
+  background: #1d3557;
+  border-color: #1d3557;
+  color: #fff;
+}
+.chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 28px;
+}
+.data-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+th, td {
+  text-align: left;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+}
+th { background: var(--bg); font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+@media (max-width: 600px) {
+  .chart-page { padding: 20px 16px 40px; }
+  .gallery-controls input[type="search"] { width: 100%; }
+}
