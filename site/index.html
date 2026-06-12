@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>San Diego Governance Charts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <h1>San Diego Governance Charts</h1>
+  <p>Data-driven views of how the City of San Diego is performing over time.</p>
+</header>
+
+<div class="gallery-controls">
+  <input type="search" id="searchInput" placeholder="Search charts…" aria-label="Search charts">
+  <select id="categoryFilter" aria-label="Filter by category">
+    <option value="">All categories</option>
+  </select>
+  <span id="resultCount" style="margin-left:auto;font-size:0.85rem;color:var(--muted)"></span>
+</div>
+
+<div class="chart-grid" id="chartGrid"></div>
+
+<script>
+async function init() {
+  const res = await fetch('charts_registry.json');
+  const charts = await res.json();
+
+  // Populate category filter
+  const categories = [...new Set(charts.map(c => c.category))].sort();
+  const sel = document.getElementById('categoryFilter');
+  categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+
+  function render() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const cat   = document.getElementById('categoryFilter').value;
+
+    const filtered = charts.filter(c => {
+      const matchQuery = !query ||
+        c.title.toLowerCase().includes(query) ||
+        c.description.toLowerCase().includes(query) ||
+        c.tags.some(t => t.includes(query));
+      const matchCat = !cat || c.category === cat;
+      return matchQuery && matchCat;
+    });
+
+    const grid = document.getElementById('chartGrid');
+    const count = document.getElementById('resultCount');
+    count.textContent = `${filtered.length} chart${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="no-results">No charts match your search.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(c => `
+      <a class="chart-card" href="${c.chart_url}">
+        <div class="category-badge">${c.category}</div>
+        <h2>${c.title}</h2>
+        <p>${c.description}</p>
+        <div class="tags">
+          ${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+      </a>
+    `).join('');
+  }
+
+  document.getElementById('searchInput').addEventListener('input', render);
+  document.getElementById('categoryFilter').addEventListener('change', render);
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

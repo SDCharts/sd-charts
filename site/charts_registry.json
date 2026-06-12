@@ -1,0 +1,22 @@
+[
+  {
+    "id": "fte_vs_population",
+    "title": "Personnel vs. Population Growth",
+    "description": "Tracks growth in total city FTE positions against MSA resident population. Shows whether the city workforce is expanding faster than the population it serves.",
+    "category": "Workforce",
+    "tags": ["workforce", "population", "growth", "efficiency"],
+    "chart_url": "charts/fte_vs_population.html",
+    "data_url": "data/fte_vs_population.json",
+    "sources": ["City of San Diego Adopted Budget", "FRED / BEA"]
+  },
+  {
+    "id": "expenditures_vs_gdp",
+    "title": "City Expenditures vs. Regional GDP",
+    "description": "Compares city operating spending growth against San Diego MSA GDP growth. Highlights whether city government is consuming a growing or stable share of the regional economy.",
+    "category": "Budget",
+    "tags": ["budget", "expenditures", "gdp", "economy", "fiscal"],
+    "chart_url": "charts/expenditures_vs_gdp.html",
+    "data_url": "data/expenditures_vs_gdp.json",
+    "sources": ["SD Open Data — Operating Actuals", "FRED / BEA"]
+  }
+]
